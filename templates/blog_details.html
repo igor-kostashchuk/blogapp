@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>Blog App: {{post.title}}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/blog_details.css">
+{% endblock %}
+
+{% block content %}
+
+
+    <div class="blog-detail-container">
+        <div class="blog-main">
+            <div class="blog-post">
+                <p class="blog-header-category">{{ post.category.title }}</p>
+                <p class="blog-header-rating">
+                    <strong>{{post.rating|floatformat:1}}</strong>
+                    <svg viewBox="0 -0.5 33 33" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="27.865 31.83 17.615 26.209 7.462 32.009
+                                         9.553 20.362 0.99 12.335 12.532 10.758 
+                                         17.394 0 22.436 10.672 34 12.047 
+                                         25.574 20.22">
+                        </polygon>
+                    </svg>
+                </p>
+                 <div class="blog-header">
+                    <img src="/static/img/Image20250610201047.png" alt>
+                    <p class="blog-header-category">{{post.category.title}}</p>
+                    <button class="blog-bookmark {%if is_post_saved%} active {% endif %}" data-post-id = "{{post.id}}"><svg fill="#000000" height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M432.9,0H107.1C94.3,0,83.8,10.4,83.8,23.3V512L270,325.8L456.2,512V23.3C456.2,10.4,445.8,0,432.9,0z M386.4,186.2h-93.1 v93.1h-46.5v-93.1h-93.1v-46.5h93.1V46.5h46.5v93.1h93.1V186.2z"></path> </g></svg></button>
+
+                </div>
+               
+                <h1>{{ post.title }}</h1>
+                
+                <div class="post-content">
+                    {{ post.content|safe }}
+                </div>
+                <div class="post-meta">
+                    <span>
+                        By <a href="/profile/{{ post.user.username }}">{% if post.user %}{{ post.user.username }}</a>{% else %}Anonymous{% endif %}
+                        on {{ post.created_at|date:"F d, Y" }}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% if recommended_posts %}
+    <div class="sidebar-widget">
+        <h3 class="widget-title">Recommended Posts</h3>
+        <ul class="widget-list">
+            {% for r_post in recommended_posts %}
+            <div class="blog">
+                <a href="{% url 'blog_details' blog_id=r_post.id %}" class="blog-link">
+                    <div class="blog-header">
+                        <img src="/static/img/Image20250610201047.png" alt>
+                        <p class="blog-header-category">{{r_post.category.title}}</p>
+                        <div class="comment-stars">
+                            {% for i in "12345" %}
+                                <svg class="{% if i|add:0 <= r_post.rating %}filled{% endif %}" 
+                                    viewBox="0 -0.5 33 33" xmlns="http://www.w3.org/2000/svg">
+                                    <polygon points="27.865 31.83 17.615 26.209 7.462 32.009 
+                                                     9.553 20.362 0.99 12.335 12.532 10.758 
+                                                     17.394 0 22.436 10.672 34 12.047 
+                                                     25.574 20.22"></polygon>
+                                </svg>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="blog-content">
+                        <h2 class="blog-title">{{r_post.title}}</h2>
+                        <p class="blog-description">{{r_post.content|truncatewords:20|safe}}</p>
+                        
+                        <div class="blog-content-created">
+                            <p class="blog-content-created-date">{{r_post.created_at|date:"d.m.Y"}}</p>
+                            <p class="blog-content-created-author">{{r_post.user}}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <div class="comments-section">
+        <h3>Comments ({{ post.comments.count }})</h3>
+        {% for comment in post.comments.all %}
+        <div class="comment-card">
+            <div class="comment-header">
+                <span class="comment-author">
+                    {% if comment.user %}{{ comment.user.username }}{% else %}Anonymous{% endif %}
+                </span>
+                <span class="comment-date">{{ comment.created_at|date:"F d, Y" }}</span>
+            </div>
+            <div class="comment-stars">
+                {% for i in "12345" %}
+                    <svg class="{% if i|add:0 <= comment.stars %}filled{% endif %}" 
+                         viewBox="0 -0.5 33 33" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="27.865 31.83 17.615 26.209 7.462 32.009 
+                                         9.553 20.362 0.99 12.335 12.532 10.758 
+                                         17.394 0 22.436 10.672 34 12.047 
+                                         25.574 20.22"></polygon>
+                    </svg>
+                {% endfor %}
+            </div>
+            <div class="comment-body">
+                {{ comment.content|safe }}
+            </div>
+        </div>
+        {% empty %}
+        <p>No comments yet. Be the first to comment!</p>
+        {% endfor %}
+    </div>
+
+    <form class="comment-form" method="post">
+        <h3>Leave a Comment</h3>
+        {% csrf_token %}
+        <div class="stars-group">
+            {% for i in "54321" %}
+            <label for="star-{{i}}">
+                <svg viewBox="0 -0.5 33 33" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="27.865 31.83 17.615 26.209 7.462 32.009 
+                                     9.553 20.362 0.99 12.335 12.532 10.758 
+                                     17.394 0 22.436 10.672 34 12.047 
+                                     25.574 20.22"></polygon>
+                </svg>
+            </label>
+            <input type="radio" id="star-{{i}}" name="stars" value="{{i}}" required>
+            {% endfor %}
+        </div>
+        {{ form.content }}
+        <button type="submit">Submit</button>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+    const saveBtn=document.querySelector(".blog-bookmark")
+        saveBtn.addEventListener("click", (e)=>{
+            const postId=saveBtn.dataset.postId;
+            const csfrToken=document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            console.log("PostId: ", postId);
+            console.log("CSRF Token: ", csfrToken);
+
+            fetch(`/entries/${postId}/toggle-save/`, {
+                method:"POST",
+                headers:{
+                    "X-CSRFToken":csfrToken,
+                    "Content-Type":"application/json"
+                }
+            })
+            .then(response=>response.json())
+            .then(data=>{
+                if (data.isSaved){
+                    saveBtn.classList.add("active")
+                }else{
+                    saveBtn.classList.remove("active")
+                }
+            });
+        })
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>Blog App:{{title}}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/create_blog.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">{{title}}:</h1>
+    <form method = "post"action class="entry_form">
+        {% csrf_token %}
+        {% comment %} <label for="title">Title<span>*</span></label>
+        <input type="text" id="title" name="title"required>
+        <label for="content">Content<span>*</span></label>
+        <textarea id="content" name = "content"required></textarea>
+         {% endcomment %}
+        {{form.media}}
+        {{form.category.as_field_group}}
+        {{form.title.as_field_group}}
+        {{form.content.as_field_group}}
+        <button type="submit">{{title}}</button>
+    </form>
+</div>
+{% endblock %}
